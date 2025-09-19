@@ -4,10 +4,10 @@ subtitle: "Material by Sjoerd van Alten and Klervie Toczé"
 author: "Fill in your group number and names here"
 date:  "`r format(Sys.Date(), '%d-%m-%Y')`"
 output:
-  pdf_document:
-    number_sections: true
   html_document:
     df_print: paged
+  pdf_document:
+    number_sections: true
 header-includes:
 - "\\setcounter{section}{-1}"
 - |
@@ -485,29 +485,27 @@ b.  According to IMDB, the average movie is rated with a 6.5. Using your
 *step a*
 
 ```{r}
-#WRITE YOUR CODE HERE
+Thriller_movies <- Movies_4 %>%
+  filter(genre == "Thriller")
 
 
+Mean_vote <- mean(Thriller_movies$vote_average, na.rm = T)
+t.test(Thriller_movies$vote_average, mu = 5.869827, conf.level = 0.99)
 ```
-
 **Your Answer:**
-
-Write your formulated response here.
+D
 
 *step b*
 
 ```{r}
-#WRITE YOUR CODE HERE
-
-
+t.test(Thriller_movies$vote_average, mu = 6.5, alternative = "less")
 ```
 
 **Your Answer:**
+P-value < 0.05 so, reject hypothesis
 
-Write your formulated response here.
 
 2
-
 a.  How many movies in your sample had a female lead actor? How many had
     a male lead actor? \textbf{[2 points]}
 b.  Test the null hypothesis that for any given movie the chance that
@@ -535,38 +533,37 @@ d.  Assume that the variance of PR for movies with a male lead actor in
 *step a*
 
 ```{r}
-#WRITE YOUR CODE HERE
-
-
+sum(Movies_4$first_actor_gender == "male", na.rm = T)
+sum(Movies_4$first_actor_gender == "female", na.rm = T)
 ```
-
 **Your Answer:**
+Male = 558
+female = 216
 
-Write your formulated response here.
 
 *step b*
-
 ```{r}
-#WRITE YOUR CODE HERE
+binom.test(x = sum(Movies_4$first_actor_gender == "male", na.rm = T)
+, n=808, p = 0.5, alternative = "two.sided")  
 
 
 ```
 
 **Your Answer:**
-
-Write your formulated response here.
+p-value = 2.2e-16, so the hypothesis is rejected
 
 *step c*
 
 ```{r}
-#WRITE YOUR CODE HERE
-
-
+Movies_4 %>% 
+  group_by(first_actor_gender) %>% 
+  summarise(
+    Var = var(PR, na.rm = T))
+    
 ```
 
 **Your Answer:**
-
-Write your formulated response here.
+D
 
 *step d*
 
