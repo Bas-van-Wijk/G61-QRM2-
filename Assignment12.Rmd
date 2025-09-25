@@ -483,7 +483,6 @@ b.  According to IMDB, the average movie is rated with a 6.5. Using your
     your p-value and what do you conclude? \textbf{[2 points]}
 
 *step a*
-
 ```{r}
 Thriller_movies <- Movies_4 %>%
   filter(genre == "Thriller")
@@ -493,16 +492,16 @@ Mean_vote <- mean(Thriller_movies$vote_average, na.rm = T)
 t.test(Thriller_movies$vote_average, mu = 5.869827, conf.level = 0.99)
 ```
 **Your Answer:**
-D
+Firstly, we took the Thriller movies from the 116 movies of the dataset. The sample mean rating was 5.869827. A true 99% confidence interval using the formula for confidence interval for a population means using t-distribution is calculated to [5.68, 6.06].  
+
 
 *step b*
-
 ```{r}
 t.test(Thriller_movies$vote_average, mu = 6.5, alternative = "less")
 ```
 
 **Your Answer:**
-P-value < 0.05 so, reject hypothesis
+The average movie, which we know is 6.5. We then did a one-sample test of the null hypothesis (>= 6.5) and the alternative hypothesis (<6.5). The test statistic (t) was -8.5103 with a p-value of 3.739 x 10^-14. Since the p-value is less than 0.05, we can reject the null hypothesis. Thriller movies are rated lower than the average movie. 
 
 
 2
@@ -531,14 +530,12 @@ d.  Assume that the variance of PR for movies with a male lead actor in
     \textbf{[2 points]}
 
 *step a*
-
 ```{r}
 sum(Movies_4$first_actor_gender == "male", na.rm = T)
 sum(Movies_4$first_actor_gender == "female", na.rm = T)
 ```
 **Your Answer:**
-Male = 558
-female = 216
+There are 558 movies with a male lead actor and 216 with a female. 
 
 
 *step b*
@@ -548,37 +545,35 @@ binom.test(x = sum(Movies_4$first_actor_gender == "male", na.rm = T)
 
 
 ```
-
 **Your Answer:**
-p-value = 2.2e-16, so the hypothesis is rejected
+p-value = 2.2e x 10^-16, so the hypothesis is rejected. Male lead actors are more frequent than female actors in this data set. 
+
 
 *step c*
-
 ```{r}
 Movies_4 %>% 
   group_by(first_actor_gender) %>% 
   summarise(
     Var = var(PR, na.rm = T))
-    
 ```
-
 **Your Answer:**
-D
+For female lead actors the variance of PR is 27.1 and for male actors 31.3. Therefore the PR is higher for movies with male leads. 
+
 
 *step d*
-
 ```{r}
-#WRITE YOUR CODE HERE
+nf <- 152
+var_f <- 27.1
+var_m <- 31.3
 
-
+X2 <- (nf - 1 ) * var_f / var_m
+Pvalue <- 1-pchisq(X2, df = nf -1) + pchisq(X2, df = nf -1)
 ```
-
 **Your Answer:**
+X2 = 130.7, p > 0,05 so we don't reject H, the PR variance for female leads is not significantly different from male leads
 
-Write your formulated response here.
 
 3
-
 a.  Create a new variable called genre2. Make sure that the three most
     popular genres remain the same, but that all the other genres get
     categorized into one genre called "Other". Report a frequency table
@@ -598,53 +593,98 @@ d.  Now, create a new data frame which is a random subsample of n=100 of
 *step a*
 
 ```{r}
-#WRITE YOUR CODE HERE
+popular_genre = Movies_4 %>%
+  count(genre, sort = TRUE) %>%
+  slice_head(n = 3) %>%
+  pull(genre)
 
+Movies_4 = Movies_4 %>%
+  mutate(genre2 = ifelse(genre %in% popular_genre, genre, "Other"))
 
+Movies_4 %>%
+  count(genre2, sort = T)
 ```
-
 **Your Answer:**
+The three most popular genres (Drama, Comedy, Thriller) remained unchanged and the other genres went in the category “Other”. The frequency table shows Drama movies = 402, Comedy movies = 186, Thriller movies = 116, and Other = 104. 
 
-Write your formulated response here.
 
 *step b*
-
 ```{r}
-#WRITE YOUR CODE HERE
+mean_PR_genre = Movies_4 %>%
+  group_by(genre2) %>%
+  summarise(
+    mean_PR = mean(PR, na.rm = TRUE))
 
+ggplot(mean_PR_genre, aes(x = genre2, y = mean_PR)) +
+  geom_point() +
+  labs(
+    title = "Mean Profitability Ratio by Movie Genre",
+    x = "Genre",
+    y = "Mean PR")
 
+mean_PR_genre %>%
+  arrange(desc(mean_PR))
 ```
-
 **Your Answer:**
+Comedy has the highest PR (3.6) and Drama the lowest (2.44). 
 
-Write your formulated response here.
 
 *step c*
-
 ```{r}
-#WRITE YOUR CODE HERE
+mean_PR_genre = Movies_4 %>%
+  group_by(genre2) %>%
+  summarise(
+    mean_PR = mean(PR, na.rm = TRUE),
+    standard_deviation_PR = sd(PR, na.rm = TRUE),
+    sample_size = sum(!is.na(PR)),
+    standard_error_PR = standard_deviation_PR / sqrt(sample_size),
+    low_CI = mean_PR - qt(0.975, df = sample_size - 1) * standard_error_PR,
+    high_CI = mean_PR + qt(0.975, df = sample_size - 1) * standard_error_PR
+  )
 
-
+ggplot(mean_PR_genre, aes(x = genre2, y = mean_PR)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = low_CI, ymax = high_CI))
+  labs(
+    title = "Mean Profitability Ratio by Movie Genre",
+    x = "Genre",
+    y = "Mean PR")
 ```
-
 **Your Answer:**
+We recreated the scatterplot by visualizing the PR for each genre with the uncertainty estimate. The error bars show the 95% confidence interval of the mean PR. 
 
-Write your formulated response here.
 
 *step d*
-
 ```{r}
-#WRITE YOUR CODE HERE
+set.seed(123)
+subsample = Movies_4 %>%
+  sample_n(100)
 
+subsample_statistics = subsample %>%
+  group_by(genre2) %>%
+  summarise(
+    mean_PR = mean(PR, na.rm = TRUE),
+    standard_deviation_PR = sd(PR, na.rm = TRUE),
+    sample_size = sum(!is.na(PR)),
+    standard_error_PR = standard_deviation_PR / sqrt(sample_size),
+    low_CI = mean_PR - qt(0.975, df = sample_size - 1) * standard_error_PR,
+    high_CI = mean_PR + qt(0.975, df = sample_size - 1) * standard_error_PR
+  )
 
+ggplot(subsample_statistics, aes(x = genre2, y = mean_PR)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = low_CI, ymax = high_CI)) +
+  labs(
+    title = "Mean Profitability Ratio by Movie Genre",
+    x = "Genre",
+    y = "Mean PR")
 ```
-
 **Your Answer:**
+We took a random subsample of 100 movies and calculated it the same as in question c with the 95% confidence interval. If we compare the plot from the full data set to this random subsample set, we can see that they are generally wider. This is because the standard error of the mean increases when the sample size decreases, which makes it less precise, thus less reliable. 
 
-Write your formulated response here.
+
 
 # Week 4
-
 1.  There is an argument going on in the movie studio. *Bob* claims that
     production budgets are getting out of hand, and that the studio
     should focus on making cheaper movies. *Chantal* disagrees. She
