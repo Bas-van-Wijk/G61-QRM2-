@@ -716,82 +716,73 @@ g.  Based on your analysis in f.), estimate your model again, but remove
     this new model, would your advice to the movie studio in question d.
     change? \textbf{[2 points]}
 
+
 *step a*
-
 ```{r}
-#WRITE YOUR CODE HERE
-
+lm1 <- lm(PR ~ budget, data = Movies_4)
+summary(lm1)
 ```
-
 **Your Answer:**
+answer in summary
 
-Write your formulated response here.
 
 *step b*
-
 ```{r}
-#WRITE YOUR CODE HERE
-
+summary(lm1)
 ```
-
 **Your Answer:**
+The beta1 has an estimated value of -2.235e-09  
 
-Write your formulated response here.
 
 *step c*
-
 ```{r}
-#WRITE YOUR CODE HERE
-
+summary(lm1) 
 ```
-
 **Your Answer:**
+Our p-value is equal to 0.6515 which means we fail to reject our null hypothesis
 
-Write your formulated response here.
 
 *step d*
-
 ```{r}
-#WRITE YOUR CODE HERE
-
+summary(lm1) 
 ```
-
 **Your Answer:**
+We think Chantal is correct, the budget of the movie doesn't really matter for their PR ratio. (budget estimate is nearly 0)
 
-Write your formulated response here.
 
 *step e*
-
 ```{r}
-#WRITE YOUR CODE HERE
+hist(residuals(lm1))
 
+lmlog1 <- lm(log(PR + 1) ~ budget, data = Movies_4)
+hist(residuals(lmlog1))
 ```
-
 **Your Answer:**
+The model is likely not valid because the model is not normally distributed and is right skewed, even when we transformed it into a log function, even though it became more valid, it still was right skewed so we will doubt the validity of our model (with or without log).
 
-Write your formulated response here.
 
 *step f*
-
 ```{r}
-#WRITE YOUR CODE HERE
-
+n_m4 <- nrow(Movies_4)
+levcrit <- 2/n_m4
+h1 <-hatvalues(lm1)
+suspect1 <- h1[h1 > levcrit]
 ```
-
 **Your Answer:**
+We got 216 values with a high leverage, which makes it safe to say there is some doubt in the validity of our model
 
-Write your formulated response here.
 
 *step g*
-
 ```{r}
-#WRITE YOUR CODE HERE
+suspect1_rows <- which(h1 > levcrit)
+No_outlier_M4 <- Movies_4[-suspect1_rows, ]
 
+lm2 <- lm(PR ~ budget, data = No_outlier_M4)
+summary(lm2) 
 ```
-
 **Your Answer:**
+Our p-value is equal to 0.6125 which means we fail to reject our null hypothesis. and our beta1 is still close to zero so we still stick to Chantalls opinion.
 
-Write your formulated response here.
 
 2.  
 
@@ -813,21 +804,18 @@ b.  Using the insights from the scatterplot, your linear model, and your
 #WRITE YOUR CODE HERE
 
 ```
-
 **Your Answer:**
-
 Write your formulated response here.
 
-*step b*
 
+*step b*
 ```{r}
 #WRITE YOUR CODE HERE
 
 ```
-
 **Your Answer:**
-
 Write your formulated response here.
+
 
 # Week 5
 
